@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反应速度挑战</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'PingFang SC', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2c3e50;
+            color: white;
+            user-select: none; /* 防止频繁点击选中文字 */
+        }
+
+        #game-area {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+
+        /* 不同状态的颜色 */
+        .waiting { background-color: #e67e22; } /* 准备好后变成橙色，等待变色 */
+        .ready { background-color: #27ae60; }   /* 变绿了，快点！ */
+        .idle { background-color: #3498db; }    /* 初始状态：蓝色 */
+        .too-early { background-color: #c0392b; } /* 点早了：红色 */
+
+        h1 { font-size: 3rem; margin: 0; }
+        p { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <div id="game-area" class="idle" onclick="handleClick()">
+        <h1 id="title">反应时间测试</h1>
+        <p id="instruction">点击屏幕开始</p>
+    </div>
+
+    <script>
+        let state = 'idle'; // idle, waiting, ready
+        let startTime;
+        let timer;
+
+        const gameArea = document.getElementById('game-area');
+        const title = document.getElementById('title');
+        const instruction = document.getElementById('instruction');
+
+        function handleClick() {
+            if (state === 'idle' || state === 'too-early') {
+                // 开始准备阶段
+                startWaiting();
+            } else if (state === 'waiting') {
+                // 点太早了
+                showTooEarly();
+            } else if (state === 'ready') {
+                // 成功点击
+                showResult();
+            }
+        }
+
+        function startWaiting() {
+            state = 'waiting';
+            gameArea.className = 'waiting';
+            title.innerText = '等候变绿...';
+            instruction.innerText = '看到绿色时点击！';
+
+            // 随机生成 2 到 5 秒之间的等待时间
+            const delay = Math.floor(Math.random() * 3000) + 2000;
+            
+            timer = setTimeout(() => {
+                state = 'ready';
+                gameArea.className = 'ready';
+                title.innerText = '点！点！点！';
+                startTime = Date.now();
+            }, delay);
+        }
+
+        function showTooEarly() {
+            clearTimeout(timer); // 取消变绿的定时器
+            state = 'too-early';
+            gameArea.className = 'too-early';
+            title.innerText = '点早了！';
+            instruction.innerText = '别急，点击再试一次。';
+        }
+
+        function showResult() {
+            const endTime = Date.now();
+            const reactionTime = endTime - startTime;
+            state = 'idle';
+            gameArea.className = 'idle';
+            title.innerText = reactionTime + ' 毫秒';
+            instruction.innerText = '点击再次挑战！';
+        }
+    </script>
+</body>
+</html>
+
